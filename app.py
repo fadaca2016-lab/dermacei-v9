@@ -26,35 +26,37 @@ if opcion == "Escáner de Piel":
         st.image(img, width=400)
         
         if st.button("🚀 INICIAR ESCANEO POR IA"):
-            # Usamos el nombre base para máxima compatibilidad
-            try:
-                model = genai.GenerativeModel('gemini-pro-vision')
-                
-                prompt = (
-                    "Analiza esta imagen como un experto del CEI. "
-                    "Detecta biotipo cutáneo y lesiones como comedones, pápulas o pústulas. "
-                    "Sugiere un protocolo técnico con aparatología (ej. electroporación) sin marcas."
-                )
-                
-                with st.spinner("Escaneando tejido..."):
+            # Probamos con el nombre más genérico posible para evitar el error 404
+            with st.spinner("Analizando tejido..."):
+                try:
+                    # Usamos 'gemini-pro-vision' que es el estándar de oro para fotos
+                    model = genai.GenerativeModel('gemini-pro-vision')
+                    
+                    prompt = (
+                        "Analiza esta imagen como un experto del CEI. "
+                        "Identifica biotipo cutáneo y lesiones como comedones, pápulas o pústulas. "
+                        "Sugiere un protocolo técnico con aparatología sin mencionar marcas."
+                    )
+                    
                     response = model.generate_content([prompt, img])
                     st.markdown("### 📊 Resultado del Análisis Técnico")
                     st.write(response.text)
-            except Exception as e:
-                # Si falla el anterior, probamos con el flash a secas
-                try:
-                    model = genai.GenerativeModel('gemini-1.5-flash')
-                    response = model.generate_content([prompt, img])
-                    st.write(response.text)
-                except Exception as e2:
-                    st.error(f"Error técnico persistente: {e2}")
+                except Exception as e:
+                    st.error(f"El motor gemini-pro-vision no respondió. Intentando con motor alternativo...")
+                    try:
+                        # Si falla, intentamos con el motor flash pero con el nombre corto
+                        model_alt = genai.GenerativeModel('gemini-1.5-flash-latest')
+                        response = model_alt.generate_content([prompt, img])
+                        st.write(response.text)
+                    except Exception as e2:
+                        st.error(f"Error técnico persistente: {e2}")
 
 # 4. Lógica de Cosméticos
 elif opcion == "Análisis INCI Pro":
     st.subheader("🧪 Laboratorio de Activos")
     inci = st.text_area("Pegá el INCI aquí:")
     if st.button("Analizar Fórmula"):
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(f"Analiza este INCI: {inci}. Identifica activos clave.")
         st.write(response.text)
 
