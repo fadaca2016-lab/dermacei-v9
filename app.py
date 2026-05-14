@@ -1,28 +1,21 @@
-import streamlit as st
-
-st.set_page_config(page_title="Derma CEI v2.0", layout="wide")
-
-st.title("🚀 Derma CEI v2.0 - V8 Edition")
-st.write("Bienvenido, Fabio. El sistema está regulando.")
-
-st.sidebar.header("Menú Técnico")
-opcion = st.sidebar.radio("Seleccioná una función:", 
-                         ["Diagnóstico de Piel", "Análisis de Cosméticos (INCI)", "Lámpara de Wood Digital"])
-
-if opcion == "Diagnóstico de Piel":
-    st.subheader("🔍 Análisis de Biotipo y Lesiones")
-    st.info("Subí una foto para detectar comedones, pápulas o pústulas.")
-    st.file_uploader("Cargar imagen de la piel", type=["jpg", "png", "jpeg"])
-
-elif opcion == "Análisis de Cosméticos (INCI)":
-    st.subheader("🧪 Laboratorio de Activos")
-    st.write("Prioridad técnica: El activo sobre la marca.")
-    st.text_input("Ingresá el INCI o componentes:")
-    st.warning("Alerta de conflicto: Niacinamida + pH bajo detectado (Simulación)")
-
-elif opcion == "Lámpara de Wood Digital":
-    st.subheader("💡 Simulación de Fluorescencia")
-    st.file_uploader("Subí foto para filtro de Wood", type=["jpg", "png", "jpeg"])
-
-st.divider()
-st.caption("CEI - Centro de Estética Integral | Cosmetología desde Cero")
+# --- PATA 1 & 4: DIAGNÓSTICO Y PROTOCOLO ---
+if opcion == "Escáner de Piel y Lesiones":
+    st.subheader("🔍 Diagnóstico Técnico de Piel")
+    foto = st.file_uploader("Subí la foto del gabinete", type=['jpg', 'png', 'jpeg'])
+    
+    if foto:
+        img = Image.open(foto)
+        st.image(img, width=400)
+        
+        # El botón ahora está afuera para que no se esconda
+        if st.button("Iniciar Escaneo por IA"):
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = "Actúa como experto del CEI. Analiza esta piel. Detecta biotipo, comedones, pápulas y pústulas. Luego sugiere un protocolo técnico (ej. electroporación) sin mencionar marcas ni nombres propios."
+            
+            with st.spinner("Analizando tejido..."):
+                try:
+                    response = model.generate_content([prompt, img])
+                    st.markdown("### 📊 Resultado del Análisis")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"Hubo un problema con la llave: {e}")
